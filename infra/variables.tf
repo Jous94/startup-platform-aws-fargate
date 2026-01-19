@@ -55,3 +55,10 @@ variable "public_subnet_cidrs" {
   type        = list(string)
   default     = ["10.30.10.0/24", "10.30.20.0/24"]
 }
+
+variable "healthcheck_path" {
+  description = "HTTP path used by ALB health checks."
+  type        = string
+  default     = "/health"
+}
+
