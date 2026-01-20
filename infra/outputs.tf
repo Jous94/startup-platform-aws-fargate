@@ -28,3 +28,9 @@ output "alb_security_group_id" {
   value       = aws_security_group.alb.id
 }
 
+
+output "ecr_api_repository_url" {
+  description = "ECR repository URL for the API image."
+  value       = aws_ecr_repository.api.repository_url
+}
+
