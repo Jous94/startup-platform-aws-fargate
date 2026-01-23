@@ -35,9 +35,9 @@ resource "aws_db_instance" "postgres" {
   instance_class    = "db.t4g.micro"
   allocated_storage = 20
 
-  db_name  = "startup"
-  username = "startup"
-  password = "ChangeMe_12345"
+  db_name  = local.db_secret.DB_NAME
+  username = local.db_secret.DB_USER
+  password = local.db_secret.DB_PASSWORD
 
   publicly_accessible = false
   skip_final_snapshot = true
