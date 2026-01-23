@@ -40,6 +40,15 @@ resource "aws_ecs_task_definition" "api" {
       image     = "${aws_ecr_repository.api.repository_url}:latest"
       essential = true
 
+      # Database connection settings passed to the container via environment variables.
+      environment = [
+        { name = "DB_HOST", value = aws_db_instance.postgres.address },
+        { name = "DB_PORT", value = "5432" },
+        { name = "DB_NAME", value = "startup" },
+        { name = "DB_USER", value = "startup" },
+        { name = "DB_PASSWORD", value = "ChangeMe_12345" }
+      ]
+
       portMappings = [
         { containerPort = 8080, hostPort = 8080, protocol = "tcp" }
       ]
