@@ -1,0 +1,28 @@
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: startup
+      POSTGRES_USER: startup
+      POSTGRES_PASSWORD: startup
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U startup -d startup"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  api:
+    build: .
+    environment:
+      DB_HOST: db
+      DB_PORT: "5432"
+      DB_NAME: startup
+      DB_USER: startup
+      DB_PASSWORD: startup
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
