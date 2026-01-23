@@ -17,21 +17,51 @@ class DatasetIn(BaseModel):
 
 @app.on_event("startup")
 def startup() -> None:
-    # Initialize database schema for demo environments.
-    # In production, use migrations (e.g. Alembic) instead of create_all().
+    # Try to create tables on startup.
+    # If the DB is not reachable during deploy, the app should still boot and expose /health.
     try:
         Base.metadata.create_all(bind=engine)
     except OperationalError:
-        # Allow the API to start even if the database is temporarily unavailable.
         pass
 
 
 @app.get("/health")
 def health():
-    # Include database connectivity in the health signal.
+    # Check DB connectivity as part of health signal.
     try:
         with engine.connect() as conn:
             conn.exec_driver_sql("SELECT 1")
         return {"status": "ok"}
     except OperationalError:
         return {"status": "degraded", "db": "unreachable"}
+
+
+@app.get("/")
+def root():
+    return {"message": "Startup Platform API is running (with Postgres)"}
+
+
+@app.post("/datasets")
+def create_dataset(payload: DatasetIn):
+    with SessionLocal() as db:
+        ds = Dataset(name=payload.name, description=payload.description)
+        db.add(ds)
+        db.commit()
+        db.refresh(ds)
+        return {"id": ds.id, "name": ds.name, "description": ds.description}
+
+
+@app.get("/datasets")
+def list_datasets():
+    with SessionLocal() as db:
+        rows = db.execute(select(Dataset).order_by(Dataset.id.desc())).scalars().all()
+        return [{"id": r.id, "name": r.name, "description": r.description} for r in rows]
+
+
+@app.get("/datasets/{dataset_id}")
+def get_dataset(dataset_id: int):
+    with SessionLocal() as db:
+        ds = db.get(Dataset, dataset_id)
+        if not ds:
+            raise HTTPException(status_code=404, detail="Dataset not found")
+        return {"id": ds.id, "name": ds.name, "description": ds.description}
