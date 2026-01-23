@@ -2,7 +2,7 @@
 .terraform/
 *.tfstate
 *.tfstate.*
-.terraform.lock.hcl
+
 
 # Env files
 .env
